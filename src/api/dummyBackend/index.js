@@ -140,7 +140,7 @@ export function installDummyBackend(axiosInstance) {
     }
 
     // PUT /todos/:id
-    const putMatch = url.match(/\/todos\/([^/]+)$/) ;
+    const putMatch = url.match(/\/todos\/([^/]+)$/);
     if (putMatch && method === 'put') {
       try {
         const data = await handleUpdateTodo({

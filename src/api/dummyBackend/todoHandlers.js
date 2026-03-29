@@ -15,10 +15,17 @@ function saveTodos(todos) {
   localStorage.setItem(DB_TODOS_KEY, JSON.stringify(todos));
 }
 
+// Custom error helper
+function apiError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
+
 // Validate that the requesting user owns the todo (or is admin)
 function assertOwner(todo, userId, role) {
   if (role !== 'admin' && todo.userId !== userId) {
-    throw { status: 403, message: 'Forbidden' };
+    throw apiError(403, 'Forbidden');
   }
 }
 
@@ -49,7 +56,7 @@ export async function handleCreateTodo({ userId, body }) {
 export async function handleUpdateTodo({ userId, role, todoId, body }) {
   const todos = getTodos();
   const idx = todos.findIndex((t) => t.id === todoId);
-  if (idx === -1) throw { status: 404, message: 'Todo not found' };
+  if (idx === -1) throw apiError(404, 'Todo not found');
 
   assertOwner(todos[idx], userId, role);
 
@@ -68,7 +75,7 @@ export async function handleUpdateTodo({ userId, role, todoId, body }) {
 export async function handleDeleteTodo({ userId, role, todoId }) {
   const todos = getTodos();
   const idx = todos.findIndex((t) => t.id === todoId);
-  if (idx === -1) throw { status: 404, message: 'Todo not found' };
+  if (idx === -1) throw apiError(404, 'Todo not found');
 
   assertOwner(todos[idx], userId, role);
 
@@ -80,7 +87,7 @@ export async function handleDeleteTodo({ userId, role, todoId }) {
 export async function handleToggleTodo({ userId, role, todoId }) {
   const todos = getTodos();
   const idx = todos.findIndex((t) => t.id === todoId);
-  if (idx === -1) throw { status: 404, message: 'Todo not found' };
+  if (idx === -1) throw apiError(404, 'Todo not found');
 
   assertOwner(todos[idx], userId, role);
 

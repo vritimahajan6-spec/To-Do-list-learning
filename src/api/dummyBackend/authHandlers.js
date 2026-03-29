@@ -23,6 +23,14 @@ function saveUsers(users) {
   localStorage.setItem(DB_USERS_KEY, JSON.stringify(users));
 }
 
+// ---------- Custom error helper ----------
+
+function apiError(status, message) {
+  const err = new Error(message);
+  err.status = status;
+  return err;
+}
+
 // ---------- Token helpers ----------
 
 function createToken(payload, expiresIn) {
@@ -77,16 +85,13 @@ export async function handleLogin({ email, password, rememberMe }) {
   const user = users.find((u) => u.email === email);
 
   if (!user) {
-    throw { status: 401, message: 'Invalid email or password' };
+    throw apiError(401, 'Invalid email or password');
   }
 
   // Check lockout
   if (user.lockUntil && Date.now() < user.lockUntil) {
     const remaining = Math.ceil((user.lockUntil - Date.now()) / 60000);
-    throw {
-      status: 429,
-      message: `Account locked. Try again in ${remaining} minute(s).`,
-    };
+    throw apiError(429, `Account locked. Try again in ${remaining} minute(s).`);
   }
 
   // Validate password
@@ -97,7 +102,7 @@ export async function handleLogin({ email, password, rememberMe }) {
       user.failedAttempts = 0;
     }
     saveUsers(users);
-    throw { status: 401, message: 'Invalid email or password' };
+    throw apiError(401, 'Invalid email or password');
   }
 
   // Successful login — reset lockout fields
@@ -120,7 +125,7 @@ export async function handleLogin({ email, password, rememberMe }) {
 export async function handleRegister({ name, email, password }) {
   const users = getUsers();
   if (users.find((u) => u.email === email)) {
-    throw { status: 409, message: 'Email is already registered' };
+    throw apiError(409, 'Email is already registered');
   }
 
   const newUser = {
@@ -150,13 +155,13 @@ export async function handleRegister({ name, email, password }) {
 export async function handleRefreshToken({ refreshToken }) {
   const payload = validateToken(refreshToken);
   if (!payload) {
-    throw { status: 401, message: 'Refresh token expired or invalid' };
+    throw apiError(401, 'Refresh token expired or invalid');
   }
 
   const users = getUsers();
   const user = users.find((u) => u.id === payload.userId);
   if (!user) {
-    throw { status: 401, message: 'User not found' };
+    throw apiError(401, 'User not found');
   }
 
   const tokenPayload = { userId: user.id, email: user.email, role: user.role };
@@ -168,11 +173,11 @@ export async function handleRefreshToken({ refreshToken }) {
 
 export async function handleGetProfile({ token }) {
   const payload = validateToken(token);
-  if (!payload) throw { status: 401, message: 'Unauthorized' };
+  if (!payload) throw apiError(401, 'Unauthorized');
 
   const users = getUsers();
   const user = users.find((u) => u.id === payload.userId);
-  if (!user) throw { status: 404, message: 'User not found' };
+  if (!user) throw apiError(404, 'User not found');
 
   return { id: user.id, name: user.name, email: user.email, role: user.role };
 }
