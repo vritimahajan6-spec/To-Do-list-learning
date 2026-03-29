@@ -11,7 +11,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { STORAGE_KEYS } from '../utils/constants';
 
-export const ThemeContext = createContext(null);
+export const ThemeContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }) {
   );
 }
 
-export function useThemeContext() {
+export function useThemeContext() { // eslint-disable-line react-refresh/only-export-components
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useThemeContext must be used inside <ThemeProvider>');
   return ctx;

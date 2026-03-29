@@ -15,7 +15,7 @@ import { STORAGE_KEYS } from '../utils/constants';
 
 // ─── Context ──────────────────────────────────────────────────────────────────
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
@@ -167,7 +167,7 @@ export function AuthProvider({ children }) {
 }
 
 // Named export so useAuth.js can import it
-export function useAuthContext() {
+export function useAuthContext() { // eslint-disable-line react-refresh/only-export-components
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuthContext must be used inside <AuthProvider>');
   return ctx;
